@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.swing.JDialog;
@@ -133,14 +134,14 @@ public class ClientGui implements OutputPanel.EventHandlers {
 	@Override
 	public void submitClicked() {
 		System.out.println("submit clicked ");
-
+	
 		// Pulls the input box text
 		String input = outputPanel.getInputText();
 		currentMessage = "{'type': 'name', 'value' : '"+input+"'}";
 		switch (currentPrompt) {
 			case "name":
 				playerName = input;
-				outputPanel.appendOutput("Hello:" + playerName);
+				outputPanel.appendOutput("Hello: " + playerName);
 				outputPanel.appendOutput("Would you like to guess a city (ci) or a country (co) or see the leaderboard (leader)");
 				outputPanel.setPoints(points);
 				currentPrompt = "type";
@@ -170,7 +171,6 @@ public class ClientGui implements OutputPanel.EventHandlers {
 						outputPanel.appendOutput("Would you like to play again (y/n)?");
 						currentPrompt = "again";
 						break;
-				
 					default:
 						break;
 				}
@@ -181,7 +181,6 @@ public class ClientGui implements OutputPanel.EventHandlers {
 						outputPanel.appendOutput("Hello, please tell me your name.");
 						currentPrompt = "name";
 						break;
-				
 					default:
 						outputPanel.appendOutput("Goodbye 😊");
 						currentPrompt = "exit";
@@ -189,29 +188,89 @@ public class ClientGui implements OutputPanel.EventHandlers {
 				}
 				break;
 			case "city":
-				points -= 1;
-				outputPanel.setPoints(points);
-				outputPanel.appendOutput(input);
-				outputPanel.setBlanks("g _ _ _ _ _ _");
-				if (points == 0) {
-					try {
-						insertImage("img/lose.jpg", 0, 0);
-					} catch (Exception e){
-						System.out.println(e);
-					}
-					points = 10;
-					currentPrompt = "exit";
+				String wordToGuess = "rome";
+				char[] wordToGuessArray = wordToGuess.toCharArray();
+				char[] progress = new char[wordToGuess.length()];
+				Arrays.fill(progress, '_');
+				String currentProgress = new String(progress);
+	
+				int incorrectGuesses = 0;
+				int maxIncorrectGuesses = 6;
+				boolean wordGuessed = false;
+	
+				while (!wordGuessed && incorrectGuesses < maxIncorrectGuesses) {
+					if (input.equals(wordToGuess)) {
+						outputPanel.appendOutput("You got it! The word was " + wordToGuess);
+						wordGuessed = true;
+					} else {
+						for (int i = 0; i < wordToGuessArray.length; i++) {
+							if (input.charAt(0) == wordToGuessArray[i]) {
+								progress[i] = input.charAt(0);
+								currentProgress = new String(progress);
+								}
+								}
+								if (currentProgress.equals(wordToGuess)) {
+									outputPanel.appendOutput("You got it! The word was " + wordToGuess);
+									wordGuessed = true;
+								} else {
+									incorrectGuesses++;
+									outputPanel.appendOutput("Incorrect! You have " + (maxIncorrectGuesses - incorrectGuesses) + " left.");
+									outputPanel.appendOutput("Current progress: " + currentProgress);
+								}
+							}
+						}
+				
+						if (!wordGuessed) {
+							outputPanel.appendOutput("You ran out of guesses. The word was " + wordToGuess);
+						}
+				
+						outputPanel.appendOutput("Would you like to play again (y/n)?");
+						currentPrompt = "again";
+						break;
+					case "country":
+						String wordToGuessCo = "germany";
+						char[] wordToGuessArrayCo = wordToGuessCo.toCharArray();
+						char[] progressCo = new char[wordToGuessCo.length()];
+						Arrays.fill(progressCo, '_');
+						String currentProgressCo = new String(progressCo);
+				
+						int incorrectGuessesCo = 0;
+						int maxIncorrectGuessesCo = 6;
+						boolean wordGuessedCo = false;
+				
+						while (!wordGuessedCo && incorrectGuessesCo < maxIncorrectGuessesCo) {
+							if (input.equals(wordToGuessCo)) {
+								outputPanel.appendOutput("You got it! The word was " + wordToGuessCo);
+								wordGuessedCo = true;
+							} else {
+								for (int i = 0; i < wordToGuessArrayCo.length; i++) {
+									if (input.charAt(0) == wordToGuessArrayCo[i]) {
+										progressCo[i] = input.charAt(0);
+										currentProgressCo = new String(progressCo);
+									}
+								}
+				
+								if (currentProgressCo.equals(wordToGuessCo)) {
+									outputPanel.appendOutput("You got it! The word was " + wordToGuessCo);
+									wordGuessedCo = true;
+								} else {
+									incorrectGuessesCo++;
+									outputPanel.appendOutput("Incorrect! You have " + (maxIncorrectGuessesCo - incorrectGuessesCo) + " left.");
+									outputPanel.appendOutput("Current progress: " + currentProgressCo);
+								}
+							}
+						}
+				
+						if (!wordGuessedCo) {
+							outputPanel.appendOutput("You ran out of guesses. The word was " + wordToGuessCo);
+						}
+				
+						outputPanel.appendOutput("Would you like to play again (y/n)?");
+						currentPrompt = "again";
+						break;
+					default:
+						break;
 				}
-				break;
-			default:
-				break;
-		}
-
-
-		outputPanel.setInputText("");
-
-
-
 	}
 
 	/**
